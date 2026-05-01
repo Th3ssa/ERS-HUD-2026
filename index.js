@@ -7,6 +7,7 @@
     const root = document.createElement("div");
     root.id = "f1-hud-root";
 
+    // initial position (right side)
     root.style.position = "fixed";
     root.style.top = "20px";
     root.style.right = "20px";
@@ -19,11 +20,11 @@
     root.style.cursor = "grab";
     root.style.userSelect = "none";
 
-    root.textContent = "F1 HUD DRAG TEST";
+    root.textContent = "F1 HUD DRAG OK";
 
     document.body.appendChild(root);
 
-    // ── SAFE DRAG SYSTEM ──
+    // ── DRAG SYSTEM ──
     let dragging = false;
     let startX, startY, startLeft, startTop;
 
@@ -42,6 +43,7 @@
     }
 
     function end() {
+      if (!dragging) return;
       dragging = false;
 
       document.removeEventListener("mousemove", move);
@@ -51,28 +53,40 @@
     }
 
     function start(e) {
-  dragging = true;
+      dragging = true;
 
-  const p = e.touches ? e.touches[0] : e;
-  const rect = root.getBoundingClientRect();
+      const p = e.touches ? e.touches[0] : e;
+      const rect = root.getBoundingClientRect();
 
-  startX = p.clientX;
-  startY = p.clientY;
+      startX = p.clientX;
+      startY = p.clientY;
 
-  // 🔥 IMPORTANT: lock current position
-  startLeft = rect.left;
-  startTop  = rect.top;
+      // capture current position
+      startLeft = rect.left;
+      startTop  = rect.top;
 
-  // 🔥 SWITCH positioning mode
-  root.style.right = "auto";
-  root.style.left  = startLeft + "px";
-  root.style.top   = startTop  + "px";
+      // 🔥 switch from right → left positioning
+      root.style.right = "auto";
+      root.style.left  = startLeft + "px";
+      root.style.top   = startTop  + "px";
 
-  document.addEventListener("mousemove", move, { passive: false });
-  document.addEventListener("mouseup", end);
-  document.addEventListener("touchmove", move, { passive: false });
-  document.addEventListener("touchend", end);
+      document.addEventListener("mousemove", move, { passive: false });
+      document.addEventListener("mouseup", end);
+      document.addEventListener("touchmove", move, { passive: false });
+      document.addEventListener("touchend", end);
 
-  e.preventDefault();
+      e.preventDefault();
     }
 
+    root.addEventListener("mousedown", start, { passive: false });
+    root.addEventListener("touchstart", start, { passive: false });
+
+    console.log(`[${EXT_NAME}] DRAG BASELINE OK`);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
