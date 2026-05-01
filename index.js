@@ -371,12 +371,6 @@ function injectWidget() {
     renderWidget();
   });
 
-  // ── Drag logic ──
-  const root = document.getElementById('f1-hud-root');
-  const handle = document.getElementById('f1-hud-handle');
-  let dragging = false;
-  let startX, startY, startLeft, startTop;
-
   function dragStart(e) {
     dragging = true;
     dragMoved = false;
