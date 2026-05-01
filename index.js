@@ -51,35 +51,28 @@
     }
 
     function start(e) {
-      dragging = true;
+  dragging = true;
 
-      const p = e.touches ? e.touches[0] : e;
-      const rect = root.getBoundingClientRect();
+  const p = e.touches ? e.touches[0] : e;
+  const rect = root.getBoundingClientRect();
 
-      startX = p.clientX;
-      startY = p.clientY;
-      startLeft = rect.left;
-      startTop  = rect.top;
+  startX = p.clientX;
+  startY = p.clientY;
 
-      root.style.right = "auto";
+  // 🔥 IMPORTANT: lock current position
+  startLeft = rect.left;
+  startTop  = rect.top;
 
-      document.addEventListener("mousemove", move, { passive: false });
-      document.addEventListener("mouseup", end);
-      document.addEventListener("touchmove", move, { passive: false });
-      document.addEventListener("touchend", end);
+  // 🔥 SWITCH positioning mode
+  root.style.right = "auto";
+  root.style.left  = startLeft + "px";
+  root.style.top   = startTop  + "px";
 
-      e.preventDefault();
+  document.addEventListener("mousemove", move, { passive: false });
+  document.addEventListener("mouseup", end);
+  document.addEventListener("touchmove", move, { passive: false });
+  document.addEventListener("touchend", end);
+
+  e.preventDefault();
     }
 
-    root.addEventListener("mousedown", start, { passive: false });
-    root.addEventListener("touchstart", start, { passive: false });
-
-    console.log(`[${EXT_NAME}] DRAG SAFE`);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-})();
