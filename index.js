@@ -99,8 +99,9 @@
 
   document.body.appendChild(root);
 
-  const handle = root.querySelector('#f1-hud-handle');
-  const panel  = root.querySelector('#f1-hud-panel');
+  return root;
+  }
+    
 
   // ── CLICK vs DRAG DETECTION ──
   let moved = false;
@@ -194,59 +195,76 @@
 
   // ── DRAG (SAFE + SCOPED) ──
   function enableDrag(root) {
-    const handle = root.querySelector('#f1-hud-handle');
+  const handle = root.querySelector('#f1-hud-handle');
+  const panel  = root.querySelector('#f1-hud-panel');
 
-    let dragging = false;
-    let startX, startY, startLeft, startTop;
+  let dragging = false;
+  let dragMoved = false;
+  let startX, startY, startLeft, startTop;
 
-    function move(e) {
-      if (!dragging) return;
+  function move(e) {
+    if (!dragging) return;
 
-      const p = e.touches ? e.touches[0] : e;
+    const p = e.touches ? e.touches[0] : e;
 
-      const dx = p.clientX - startX;
-      const dy = p.clientY - startY;
+    const dx = p.clientX - startX;
+    const dy = p.clientY - startY;
 
-      root.style.left = startLeft + dx + 'px';
-      root.style.top = startTop + dy + 'px';
-
-      e.preventDefault();
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+      dragMoved = true;
     }
 
-    function end() {
-      dragging = false;
+    root.style.left = startLeft + dx + 'px';
+    root.style.top  = startTop  + dy + 'px';
 
-      document.removeEventListener('mousemove', move);
-      document.removeEventListener('mouseup', end);
-      document.removeEventListener('touchmove', move);
-      document.removeEventListener('touchend', end);
-    }
-
-    function start(e) {
-      dragging = true;
-
-      const p = e.touches ? e.touches[0] : e;
-
-      const rect = root.getBoundingClientRect();
-
-      startX = p.clientX;
-      startY = p.clientY;
-      startLeft = rect.left;
-      startTop = rect.top;
-
-      root.style.right = 'auto';
-
-      document.addEventListener('mousemove', move, { passive: false });
-      document.addEventListener('mouseup', end);
-      document.addEventListener('touchmove', move, { passive: false });
-      document.addEventListener('touchend', end);
-
-      e.preventDefault();
-    }
-
-    handle.addEventListener('mousedown', start, { passive: false });
-    handle.addEventListener('touchstart', start, { passive: false });
+    e.preventDefault();
   }
+
+  function end() {
+    dragging = false;
+
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('mouseup', end);
+    document.removeEventListener('touchmove', move);
+    document.removeEventListener('touchend', end);
+  }
+
+  function start(e) {
+    dragging = true;
+    dragMoved = false;
+
+    const p = e.touches ? e.touches[0] : e;
+    const rect = root.getBoundingClientRect();
+
+    startX = p.clientX;
+    startY = p.clientY;
+    startLeft = rect.left;
+    startTop  = rect.top;
+
+    root.style.right = 'auto';
+
+    document.addEventListener('mousemove', move, { passive: false });
+    document.addEventListener('mouseup', end);
+    document.addEventListener('touchmove', move, { passive: false });
+    document.addEventListener('touchend', end);
+
+    e.preventDefault();
+  }
+
+  // DRAG START
+  handle.addEventListener('mousedown', start, { passive: false });
+  handle.addEventListener('touchstart', start, { passive: false });
+
+  // CLICK TO TOGGLE (uses dragMoved from same scope)
+  handle.addEventListener('click', () => {
+    if (dragMoved) return;
+
+    state.open = !state.open;
+    panel.style.display = state.open ? 'block' : 'none';
+  });
+  }
+      
+      
 
   // ── RENDER (MINIMAL SAFE) ──
   function render() {
