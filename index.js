@@ -18,69 +18,54 @@
     root.style.fontFamily = "monospace";
     root.style.cursor = "grab";
 
-    // 🔥 CRITICAL FOR MOBILE DRAG
+    // 🔥 critical
     root.style.touchAction = "none";
 
-    root.textContent = "F1 HUD DRAG MOBILE FIX";
+    root.textContent = "F1 HUD POINTER DRAG";
 
     document.body.appendChild(root);
 
     let dragging = false;
     let startX, startY, startLeft, startTop;
 
-    function move(e) {
-      if (!dragging) return;
-
-      const p = e.touches ? e.touches[0] : e;
-
-      const dx = p.clientX - startX;
-      const dy = p.clientY - startY;
-
-      root.style.left = startLeft + dx + "px";
-      root.style.top  = startTop  + dy + "px";
-
-      e.preventDefault();
-    }
-
-    function end() {
-      if (!dragging) return;
-      dragging = false;
-
-      document.removeEventListener("touchmove", move);
-      document.removeEventListener("touchend", end);
-      document.removeEventListener("mousemove", move);
-      document.removeEventListener("mouseup", end);
-    }
-
-    function start(e) {
+    root.addEventListener("pointerdown", (e) => {
       dragging = true;
 
-      const p = e.touches ? e.touches[0] : e;
       const rect = root.getBoundingClientRect();
 
-      startX = p.clientX;
-      startY = p.clientY;
-
+      startX = e.clientX;
+      startY = e.clientY;
       startLeft = rect.left;
       startTop  = rect.top;
 
+      // switch positioning
       root.style.right = "auto";
       root.style.left  = startLeft + "px";
       root.style.top   = startTop  + "px";
 
-      // 🔥 IMPORTANT: prevent scroll immediately
-      e.preventDefault();
+      root.setPointerCapture(e.pointerId);
+    });
 
-      document.addEventListener("touchmove", move, { passive: false });
-      document.addEventListener("touchend", end);
-      document.addEventListener("mousemove", move, { passive: false });
-      document.addEventListener("mouseup", end);
-    }
+    root.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
 
-    root.addEventListener("touchstart", start, { passive: false });
-    root.addEventListener("mousedown", start, { passive: false });
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
 
-    console.log(`[${EXT_NAME}] MOBILE DRAG FIX ACTIVE`);
+      root.style.left = startLeft + dx + "px";
+      root.style.top  = startTop  + dy + "px";
+    });
+
+    root.addEventListener("pointerup", (e) => {
+      dragging = false;
+      root.releasePointerCapture(e.pointerId);
+    });
+
+    root.addEventListener("pointercancel", () => {
+      dragging = false;
+    });
+
+    console.log(`[${EXT_NAME}] POINTER DRAG ACTIVE`);
   }
 
   if (document.readyState === "loading") {
