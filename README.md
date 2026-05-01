@@ -32,7 +32,7 @@ After each message, the extension reads the last 6 messages from your chat and e
 2. Go to **Extensions** → **Install extension**
 3. Enter:
    ```
-   Th3ssa/f1-ers-hud
+   https://github.com/Th3ssa/ERS-HUD-2026
    ```
 4. Click **Install**
 5. Toggle the extension **ON**
