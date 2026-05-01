@@ -138,6 +138,45 @@
 
   return root;
   }
+    
+    
+
+  // ── CLICK vs DRAG DETECTION ──
+  let moved = false;
+
+  handle.addEventListener('mousedown', () => {
+    moved = false;
+  });
+
+  handle.addEventListener('mousemove', () => {
+    moved = true;
+  });
+
+  handle.addEventListener('mouseup', () => {
+    if (!moved) {
+      state.open = !state.open;
+      panel.style.display = state.open ? 'block' : 'none';
+    }
+  });
+
+  // Mobile support
+  handle.addEventListener('touchstart', () => {
+    moved = false;
+  });
+
+  handle.addEventListener('touchmove', () => {
+    moved = true;
+  });
+
+  handle.addEventListener('touchend', () => {
+    if (!moved) {
+      state.open = !state.open;
+      panel.style.display = state.open ? 'block' : 'none';
+    }
+  });
+
+  return root;
+  }
 
   
 
