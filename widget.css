@@ -1,0 +1,302 @@
+/* ── F1 2026 ERS HUD — Shape C widget styles ─────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Share+Tech+Mono&display=swap');
+
+/* ── Root container ── */
+#f1-hud-root {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  pointer-events: none;
+  font-family: 'Barlow Condensed', sans-serif;
+}
+
+#f1-hud-root * {
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+/* ── Animations ── */
+@keyframes f1-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.15; }
+}
+@keyframes f1-wglow-green {
+  0%, 100% { box-shadow: -4px 0 28px rgba(0,255,136,0.45), 0 4px 40px rgba(0,0,0,.95); }
+  50%       { box-shadow: -4px 0 52px rgba(0,255,136,0.45), 0 0 70px rgba(0,255,136,0.45), 0 4px 40px rgba(0,0,0,.95); }
+}
+@keyframes f1-wglow-amber {
+  0%, 100% { box-shadow: -4px 0 28px rgba(255,184,0,0.42), 0 4px 40px rgba(0,0,0,.95); }
+  50%       { box-shadow: -4px 0 52px rgba(255,184,0,0.42), 0 0 70px rgba(255,184,0,0.42), 0 4px 40px rgba(0,0,0,.95); }
+}
+@keyframes f1-wglow-teal {
+  0%, 100% { box-shadow: -4px 0 28px rgba(13,207,207,0.32), 0 4px 40px rgba(0,0,0,.95); }
+  50%       { box-shadow: -4px 0 52px rgba(13,207,207,0.32), 0 0 70px rgba(13,207,207,0.32), 0 4px 40px rgba(0,0,0,.95); }
+}
+@keyframes f1-lowbatt {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* ── Panel ── */
+#f1-hud-panel {
+  background: linear-gradient(155deg, #080814, #050510);
+  border: 1px solid #0dcfcf1e;
+  border-right: none;
+  border-radius: 0 0 0 6px;
+  padding: 10px 10px 10px 12px;
+  transition: border-color 0.5s, box-shadow 0.5s;
+  position: relative;
+  display: none;
+}
+#f1-hud-panel.open { display: block; }
+#f1-hud-panel.mode-OVERTAKE { border-color: rgba(0,255,136,0.2);  animation: f1-wglow-green 2s ease-in-out infinite; }
+#f1-hud-panel.mode-BOOST    { border-color: rgba(255,184,0,0.2);  animation: f1-wglow-amber 2s ease-in-out infinite; }
+#f1-hud-panel.mode-NORMAL   { border-color: rgba(13,207,207,0.12); animation: f1-wglow-teal  2s ease-in-out infinite; }
+
+/* ── Panel corner accents ── */
+#f1-hud-panel::before,
+#f1-hud-panel::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  transition: border-color 0.5s;
+}
+#f1-hud-panel::before { top: 0; left: 0; border-top: 1.5px solid currentColor; border-left: 1.5px solid currentColor; }
+#f1-hud-panel::after  { bottom: 0; left: 0; border-bottom: 1.5px solid currentColor; border-left: 1.5px solid currentColor; border-radius: 0 0 0 6px; }
+#f1-hud-panel.mode-OVERTAKE::before,
+#f1-hud-panel.mode-OVERTAKE::after { color: rgba(0,255,136,0.35); }
+#f1-hud-panel.mode-BOOST::before,
+#f1-hud-panel.mode-BOOST::after    { color: rgba(255,184,0,0.35); }
+#f1-hud-panel.mode-NORMAL::before,
+#f1-hud-panel.mode-NORMAL::after   { color: rgba(13,207,207,0.28); }
+
+/* ── Handle ── */
+#f1-hud-handle {
+  width: 34px;
+  cursor: pointer;
+  background: linear-gradient(180deg, #080812, #060610);
+  border: 1px solid #0dcfcf28;
+  border-right: none;
+  border-radius: 0 0 0 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0 8px;
+  gap: 6px;
+  transition: border-color 0.5s, box-shadow 0.5s;
+  user-select: none;
+}
+
+/* ── Handle children ── */
+.f1-handle-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  animation: f1-blink 1.4s ease-in-out infinite;
+  transition: background 0.5s, box-shadow 0.5s;
+}
+.f1-handle-kmh {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 1px;
+}
+.f1-handle-mode {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  transition: color 0.5s, text-shadow 0.5s;
+}
+.f1-handle-driver {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  transition: color 0.5s, text-shadow 0.5s;
+}
+.f1-handle-energy-bar {
+  width: 4px;
+  height: 28px;
+  background: #041010;
+  border-radius: 2px;
+  border: 1px solid #0a1414;
+  overflow: hidden;
+  position: relative;
+}
+.f1-handle-energy-fill {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  transition: height 0.25s, background 0.5s;
+}
+.f1-handle-energy-pct {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 7px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  transition: color 0.5s;
+}
+.f1-handle-arrow {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: #0a3030;
+  margin-top: auto;
+}
+
+/* ── Parsing indicator ── */
+#f1-parse-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #0a2a2a;
+  transition: background 0.3s, box-shadow 0.3s;
+  display: none;
+}
+#f1-parse-indicator.parsing {
+  display: block;
+  background: #FFB800;
+  box-shadow: 0 0 6px #FFB800;
+  animation: f1-blink 0.6s ease-in-out infinite;
+}
+#f1-parse-indicator.done {
+  display: block;
+  background: #00ff88;
+  box-shadow: 0 0 6px #00ff88;
+}
+
+/* ── Collapse button ── */
+#f1-collapse-btn {
+  position: absolute;
+  bottom: 8px;
+  right: -1px;
+  cursor: pointer;
+  padding: 3px 5px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #0a3030;
+  transition: color 0.2s;
+}
+#f1-collapse-btn:hover { color: #0dcfcf; }
+
+/* ── Section labels ── */
+.f1-section-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #0a4a4a;
+}
+.f1-mono {
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* ── Seg bars ── */
+.f1-segbar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 24px;
+}
+.f1-segbar-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  margin-bottom: 1px;
+}
+.f1-seg {
+  width: 14px;
+  height: 11px;
+  border-radius: 2px;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.f1-seg.off {
+  background: #041410;
+  border: 1px solid #042010;
+  box-shadow: none;
+}
+
+/* ── Gear strip ── */
+.f1-gear-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-left: 5px;
+}
+.f1-gear-item {
+  width: 22px;
+  height: 12px;
+  border-radius: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.f1-gear-item.active {
+  background: #0dcfcf;
+  border: 1px solid #0dcfcf;
+  box-shadow: 0 0 10px rgba(13,207,207,0.65);
+}
+.f1-gear-item.inactive {
+  background: transparent;
+  border: 1px solid #061616;
+}
+.f1-gear-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+/* ── Energy store bar ── */
+#f1-energy-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  transition: width 0.15s, background 0.5s;
+}
+#f1-energy-bar-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  filter: blur(4px);
+  opacity: 0.28;
+  transition: width 0.15s, background 0.5s;
+}
+
+/* ── Brake / throttle bars ── */
+.f1-input-bar-fill {
+  height: 100%;
+  transition: width 0.2s, background 0.5s;
+}
+
+/* ── Aero flap transitions ── */
+.f1-rw-flap, .f1-fw-flap {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+  transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+}
