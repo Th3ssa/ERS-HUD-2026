@@ -85,18 +85,61 @@
     </div>
 
     <div id="f1-hud-handle" style="
-      cursor:pointer;
+      cursor:grab;
       padding:6px;
       background:#080812;
       border:1px solid #0dcfcf28;
       color:#0dcfcf;
       font-size:10px;
+      user-select:none;
     ">
       HUD
     </div>
   `;
 
   document.body.appendChild(root);
+
+  const handle = root.querySelector('#f1-hud-handle');
+  const panel  = root.querySelector('#f1-hud-panel');
+
+  // ── CLICK vs DRAG DETECTION ──
+  let moved = false;
+
+  handle.addEventListener('mousedown', () => {
+    moved = false;
+  });
+
+  handle.addEventListener('mousemove', () => {
+    moved = true;
+  });
+
+  handle.addEventListener('mouseup', () => {
+    if (!moved) {
+      state.open = !state.open;
+      panel.style.display = state.open ? 'block' : 'none';
+    }
+  });
+
+  // Mobile support
+  handle.addEventListener('touchstart', () => {
+    moved = false;
+  });
+
+  handle.addEventListener('touchmove', () => {
+    moved = true;
+  });
+
+  handle.addEventListener('touchend', () => {
+    if (!moved) {
+      state.open = !state.open;
+      panel.style.display = state.open ? 'block' : 'none';
+    }
+  });
+
+  return root;
+  }
+
+  
 
   // ✅ Toggle logic
   const handle = root.querySelector('#f1-hud-handle');
