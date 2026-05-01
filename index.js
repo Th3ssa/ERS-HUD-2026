@@ -1,11 +1,9 @@
-// ═══════════════════════════════════════════════════════════════════════════════
+═════════════════════════════════════════════════════════════════════════════
 // F1 2026 ERS HUD — SillyTavern Extension
 // index.js
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // ── ST API — version-agnostic (no static imports) ─────────────────────────────
-// ST exposes chat, eventSource, event_types, generateQuietPrompt on window.
-// Using window globals avoids path-resolution failures across ST versions.
 
 function getSTContext() {
   return {
@@ -30,7 +28,6 @@ function registerSTEvents(callback) {
     console.log('[f1-ers-hud] Registered via eventSource.');
     return;
   }
-  // Fallback: MutationObserver on ST chat container
   const chatEl = document.getElementById('chat');
   if (chatEl) {
     new MutationObserver(callback).observe(chatEl, { childList: true });
@@ -53,8 +50,6 @@ const RECHARGE_CLR = '#00D4FF';
 
 const RAMP_LO = 290;
 const RAMP_HI = 355;
-
-// No hardcoded driver list — codes are derived generically from surname
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
@@ -87,8 +82,6 @@ function mguKPct(kmh) {
 }
 
 function driverCode(name) {
-  // Strip spaces/hyphens, take first 3 chars uppercase
-  // e.g. "Verstappen" → "VER", "De Vries" → "DEV", "Hye-rim" → "HYE"
   return name.replace(/[\s\-]/g, '').slice(0, 3).toUpperCase();
 }
 
@@ -154,33 +147,22 @@ function buildWidgetHTML() {
               .f1-fw-flap { transform-box:fill-box; transform-origin:0% 50%; transition:transform .4s cubic-bezier(.4,0,.2,1); }
             </style>
           </defs>
-          <!-- RW label -->
           <text x="1" y="6.5" font-family="'Barlow Condensed',sans-serif" font-size="4.5" font-weight="700" letter-spacing="1" fill="#0a4040">RW</text>
-          <!-- RW main plane (fixed) -->
           <path id="f1-rw-main" d="M 8 9 C 11 6.5 30 6.5 40 8.5 L 40 12 C 30 12 11 12 8 11.5 Z" fill="#0dcfcf33" stroke="#0dcfcf" stroke-width="0.7"/>
-          <!-- RW strut -->
           <line x1="22" y1="12" x2="22" y2="17" stroke="#0dcfcf" stroke-width="0.8" stroke-opacity="0.35"/>
-          <!-- RW hinge dot -->
           <circle id="f1-rw-pivot" cx="40" cy="10.25" r="1.2" fill="#0dcfcf" opacity="0.8"/>
-          <!-- RW flap (rotates) -->
           <g class="f1-rw-flap" id="f1-rw-flap">
             <rect x="40" y="8.5" width="13" height="3.5" rx="0.5" id="f1-rw-rect"
               fill="#0dcfcf" stroke="#0dcfcf" stroke-width="0.4" opacity="0.9" filter="url(#ag3)"/>
           </g>
-          <!-- separator -->
           <line x1="1" y1="19.5" x2="57" y2="19.5" stroke="#0a2020" stroke-width="0.5" stroke-dasharray="2 2"/>
-          <!-- FW label -->
           <text x="1" y="26.5" font-family="'Barlow Condensed',sans-serif" font-size="4.5" font-weight="700" letter-spacing="1" fill="#0a4040">FW</text>
-          <!-- FW main plane (fixed) -->
           <path id="f1-fw-main" d="M 8 28.5 C 10 26.5 26 26.5 34 27.5 L 34 30.5 C 26 30.5 10 30.5 8 29.5 Z" fill="#0dcfcf33" stroke="#0dcfcf" stroke-width="0.7"/>
-          <!-- FW hinge dot -->
           <circle id="f1-fw-pivot" cx="34" cy="29" r="1.1" fill="#0dcfcf" opacity="0.8"/>
-          <!-- FW flap (rotates) -->
           <g class="f1-fw-flap" id="f1-fw-flap">
             <rect x="34" y="27.5" width="11" height="3" rx="0.5" id="f1-fw-rect"
               fill="#0dcfcf" stroke="#0dcfcf" stroke-width="0.4" opacity="0.9" filter="url(#ag3)"/>
           </g>
-          <!-- state label -->
           <text id="f1-aero-state-label" x="1" y="40.5" font-family="'Barlow Condensed',sans-serif"
             font-size="4" font-weight="700" letter-spacing="0.5" fill="#0dcfcf99">FLAT · LOW DRAG</text>
         </svg>
@@ -222,7 +204,7 @@ function buildWidgetHTML() {
         <div id="f1-recharge-segs" style="display:flex;flex-direction:column-reverse;gap:2px;"></div>
       </div>
 
-      <!-- Speed circle — 120x120 -->
+      <!-- Speed circle -->
       <div style="position:relative;width:120px;height:120px;flex-shrink:0;">
         <svg width="120" height="120" style="position:absolute;top:0;left:0;" id="f1-circle-svg">
           <defs>
@@ -354,7 +336,6 @@ function injectWidget() {
   root.innerHTML = buildWidgetHTML();
   document.body.appendChild(root);
 
-  // Build initial seg bars + gear strip
   buildSegBars();
   buildGearStrip();
   buildEnergyPips();
@@ -362,7 +343,7 @@ function injectWidget() {
   // ── Handle toggle (click without drag) ──
   let dragMoved = false;
   document.getElementById('f1-hud-handle').addEventListener('click', () => {
-    if (dragMoved) return; // don't toggle if it was a drag
+    if (dragMoved) return;
     state.open = !state.open;
     renderWidget();
   });
@@ -372,7 +353,10 @@ function injectWidget() {
   });
 
   // ── Drag logic ──
-  const root = document.getElementById('f1-hud-root');
+  // FIX: Removed duplicate `const root` declaration that was here.
+  // `root` is already in scope from the top of this function and refers
+  // to the same element — redeclaring it with `const` caused a SyntaxError
+  // that prevented the entire script from loading.
   const handle = document.getElementById('f1-hud-handle');
   let dragging = false;
   let startX, startY, startLeft, startTop;
@@ -387,7 +371,6 @@ function injectWidget() {
     startLeft = rect.left;
     startTop  = rect.top;
     root.classList.add('dragging');
-    // Switch to left/top positioning
     root.style.right  = 'auto';
     root.style.left   = startLeft + 'px';
     root.style.top    = startTop  + 'px';
@@ -477,11 +460,9 @@ function renderWidget() {
   const straight = state.aero === 'X';
   const flapAngle = straight ? 0 : 14;
 
-  // ── Panel open/close ──
   const panel = document.getElementById('f1-hud-panel');
   panel.className = `${state.open ? 'open' : ''} mode-${state.mode}`;
 
-  // ── Speed circle ──
   const arcMain = document.getElementById('f1-arc-main');
   const arcGlow = document.getElementById('f1-arc-glow');
   if (arcMain) {
@@ -495,13 +476,11 @@ function renderWidget() {
   setText('f1-kmh', Math.round(state.kmh));
   setText('f1-mph', mph);
 
-  // ── Mode labels ──
   const boostOn    = state.mode === 'BOOST';
   const overtakeOn = state.mode === 'OVERTAKE';
   styleBoostLabel(boostOn);
   styleOvertakeLabel(overtakeOn);
 
-  // ── Driver — handle + nameplate only ──
   const code = driverCode(state.driver);
   setText('f1-driver-nameplate', state.driver.toUpperCase());
   setText('f1-handle-driver',   code);
@@ -512,12 +491,10 @@ function renderWidget() {
   setStyle('f1-live-dot',        'background', mc.arc);
   setStyle('f1-live-dot',        'boxShadow', `0 0 7px ${mc.arc}`);
 
-  // ── Battery ──
   const bw = Math.round((state.energy / 100) * 15);
   const batt = document.getElementById('f1-battery-fill');
   if (batt) { batt.setAttribute('width', bw); batt.setAttribute('fill', eClr); }
 
-  // ── Handle ──
   setText('f1-handle-kmh', Math.round(state.kmh));
   setText('f1-handle-mode', mc.short);
   setStyle('f1-handle-dot',  'background', mc.arc);
@@ -532,11 +509,9 @@ function renderWidget() {
   setText('f1-handle-energy-pct', `${Math.round(state.energy)}%`);
   setStyle('f1-handle-energy-pct', 'color', eClr);
 
-  // ── Seg bars ──
   renderSegs('f1-deploy-segs',   state.deploy,   DEPLOY_CLR,   'FF,140,0');
   renderSegs('f1-recharge-segs', state.recharge, RECHARGE_CLR, '0,212,255');
 
-  // ── Gear strip ──
   ['N','1','2','3','4','5','6','7','8'].forEach(g => {
     const el = document.getElementById(`f1-gear-${g}`);
     if (!el) return;
@@ -545,7 +520,6 @@ function renderWidget() {
     el.querySelector('.f1-gear-text').style.color = on ? '#000' : '#163030';
   });
 
-  // ── Energy bar ──
   setStyle('f1-energy-bar-fill', 'width', `${state.energy}%`);
   setStyle('f1-energy-bar-fill', 'background', `linear-gradient(90deg,${eClr}88,${eClr})`);
   setStyle('f1-energy-bar-glow', 'width', `${state.energy}%`);
@@ -553,7 +527,6 @@ function renderWidget() {
   setText('f1-energy-pct', `${Math.round(state.energy)}%`);
   setStyle('f1-energy-pct', 'color', eClr);
 
-  // Pips
   for (let i = 0; i < 10; i++) {
     const pip = document.getElementById(`f1-pip-${i}`);
     if (!pip) continue;
@@ -562,7 +535,6 @@ function renderWidget() {
     pip.style.borderColor = on ? `${eClr}44` : '#0a1212';
   }
 
-  // ── Brake / throttle ──
   setStyle('f1-brake-fill',    'width', `${state.brake}%`);
   setStyle('f1-throttle-fill', 'width', `${state.throttle}%`);
   setStyle('f1-throttle-fill', 'background', mc.arc);
@@ -570,7 +542,6 @@ function renderWidget() {
   setStyle('f1-throttle-label', 'color', state.throttle > 10 ? mc.arc    : '#0a1c1c');
   setText('f1-turn', state.turn);
 
-  // ── MGU-K ──
   const rampLabel = document.getElementById('f1-ramp-label');
   const rampPctEl = document.getElementById('f1-ramp-pct');
   if (rampLabel) rampLabel.textContent = state.kmh > RAMP_LO ? 'RAMP↓' : 'FULL';
@@ -598,7 +569,6 @@ function renderWidget() {
     deratingLbl.style.color = derating ? '#FF4444'  : '#0a2a2a';
   }
 
-  // ── Active Aero ──
   const aeroColor = straight ? '#0dcfcf' : '#FF8C00';
   const aeroBorderColor = `${aeroColor}28`;
   const aeroPanel = document.getElementById('f1-aero-panel');
@@ -606,7 +576,6 @@ function renderWidget() {
     aeroPanel.style.borderColor = aeroBorderColor;
     aeroPanel.style.boxShadow   = `0 0 10px ${aeroColor}10`;
   }
-  // Update all aero SVG colors
   ['f1-rw-main','f1-fw-main'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.setAttribute('fill', `${aeroColor}33`); el.setAttribute('stroke', aeroColor); }
@@ -619,7 +588,7 @@ function renderWidget() {
     const el = document.getElementById(id);
     if (el) { el.setAttribute('fill', aeroColor); el.setAttribute('stroke', aeroColor); }
   });
-  // Rotate flaps
+
   const rwFlap = document.getElementById('f1-rw-flap');
   const fwFlap = document.getElementById('f1-fw-flap');
   if (rwFlap) rwFlap.style.transform = `rotate(${flapAngle}deg)`;
@@ -782,27 +751,19 @@ async function parseContext() {
   const ctx = getSTContext();
   if (!ctx.chat || ctx.chat.length === 0) return;
 
-  // Grab last 6 messages
   const recent = ctx.chat.slice(-6).map(m => `${m.name}: ${m.mes}`).join('\n\n');
-
-  // Current character name as additional hint
   const charHint = ctx.name2 ? `Current character in scene: ${ctx.name2}` : '';
-
   const prompt = `${PARSE_PROMPT}\n\n${charHint}\n\nCHAT EXCERPT:\n${recent}`;
 
-  // Show parsing indicator
   const indicator = document.getElementById('f1-parse-indicator');
   if (indicator) indicator.className = 'parsing';
 
   try {
     const raw = await quietPrompt(prompt);
-
-    // Extract JSON — handles any stray text around it
     const jsonMatch = raw.match(/\{[\s\S]*?\}/);
     if (!jsonMatch) throw new Error('No JSON in response');
     const parsed = JSON.parse(jsonMatch[0]);
 
-    // Validate and apply — only overwrite fields that came back valid
     if (typeof parsed.driver   === 'string' && parsed.driver.length > 0)  state.driver   = parsed.driver;
     if (typeof parsed.kmh      === 'number' && parsed.kmh >= 0)           state.kmh      = Math.min(370, Math.round(parsed.kmh));
     if (parsed.gear !== undefined)                                          state.gear     = parsed.gear;
@@ -826,7 +787,6 @@ async function parseContext() {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
-// jQuery is always available in ST — use it for safe DOM-ready hook
 jQuery(function () {
   try {
     injectWidget();
@@ -836,3 +796,4 @@ jQuery(function () {
     console.error('[f1-ers-hud] Init error:', err);
   }
 });
+```
