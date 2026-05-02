@@ -1,0 +1,10 @@
+{
+  "display_name": "F1 2026 ERS HUD",
+  "version": "1.1.0",
+  "author": "Venice / Claude",
+  "description": "Live F1 2026 telemetry HUD. Reads chat context to update speed, gear, ERS, aero, and driver POV automatically.",
+  "js": "index.js",
+  "css": "widget.css",
+  "tags": ["telemetry", "f1", "hud", "roleplay"],
+  "requires": []
+}
